@@ -35,7 +35,8 @@ const cors = require('cors');
 const app = express();
 const PORT = 8001;
 
-connectToMongoDB('mongodb://localhost:27017/short-url')
+// connectToMongoDB('mongodb://localhost:27017/short-url')
+connectToMongoDB('mongodb+srv://akankshadubey2558:gknklQe0cIkswWpU@cluster0.jacqlm1.mongodb.net/')
     .then(() => console.log("Mongoose connected"));
 
 app.set('view engine', 'ejs');
