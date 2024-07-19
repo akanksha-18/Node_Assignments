@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>Welcome, <%= user.username %></h1>
+  <h2>Upload a file</h2>
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Upload</button>
+  </form>
+  
+  <h2>Your Files</h2>
+  <ul>
+    <% files.forEach(function(file) { %>
+      <li>
+        <%= file.name %> 
+        <a href="/download/<%= file._id %>">Download</a>
+      </li>
+    <% }); %>
+  </ul>
+</body>
+</html>
