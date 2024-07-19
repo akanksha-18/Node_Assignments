@@ -142,6 +142,7 @@ const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -165,10 +166,16 @@ app.use(session({
   saveUninitialized: true
 }));
 
+// Ensure the uploads directory exists
+const uploadDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Multer configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads/');
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -212,27 +219,37 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const user = await User.findOne({ username: req.body.username });
-  if (!user) {
-    return res.redirect('/login?message=User not registered');
-  }
+  try {
+    const user = await User.findOne({ username: req.body.username });
+    if (!user) {
+      return res.redirect('/login?message=User not registered');
+    }
 
-  const isMatch = await bcrypt.compare(req.body.password, user.password);
-  if (isMatch) {
-    req.session.userId = user._id;
-    res.redirect('/dashboard');
-  } else {
-    res.redirect('/login?message=Incorrect username or password');
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    if (isMatch) {
+      req.session.userId = user._id;
+      res.redirect('/dashboard');
+    } else {
+      res.redirect('/login?message=Incorrect username or password');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.redirect('/login?message=Error during login');
   }
 });
 
 app.get('/dashboard', async (req, res) => {
-  if (req.session.userId) {
-    const user = await User.findById(req.session.userId);
-    const files = await File.find({ owner: req.session.userId });
-    res.render('dashboard', { user: user, files: files });
-  } else {
-    res.redirect('/login');
+  try {
+    if (req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      const files = await File.find({ owner: req.session.userId });
+      res.render('dashboard', { user: user, files: files });
+    } else {
+      res.redirect('/login');
+    }
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    res.redirect('/login?message=Error loading dashboard');
   }
 });
 
@@ -261,15 +278,20 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 app.get('/download/:fileId', async (req, res) => {
-  if (req.session.userId) {
-    const file = await File.findOne({ _id: req.params.fileId, owner: req.session.userId });
-    if (file) {
-      res.download(path.join(__dirname, 'public/uploads', file.path), file.name);
+  try {
+    if (req.session.userId) {
+      const file = await File.findOne({ _id: req.params.fileId, owner: req.session.userId });
+      if (file) {
+        res.download(path.join(uploadDir, file.path), file.name);
+      } else {
+        res.status(404).send('File not found');
+      }
     } else {
-      res.send('File not found');
+      res.redirect('/login');
     }
-  } else {
-    res.redirect('/login');
+  } catch (error) {
+    console.error('Download error:', error);
+    res.status(500).send('An error occurred during download: ' + error.message);
   }
 });
 
