@@ -30,16 +30,23 @@ app.use(session({
 }));
 
 // Multer configuration
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'public/uploads/');
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   }
+// });
+// const upload = multer({ storage: storage });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads/');
+    cb(null, '/tmp/');
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage: storage });
-
 // Routes
 app.get('/', (req, res) => {
   res.render('index');
@@ -101,17 +108,41 @@ app.get('/dashboard', async (req, res) => {
   }
 });
 
+// app.post('/upload', upload.single('file'), async (req, res) => {
+//   if (req.session.userId) {
+//     const file = new File({
+//       name: req.file.originalname,
+//       path: req.file.filename,
+//       owner: req.session.userId
+//     });
+//     await file.save();
+//     res.redirect('/dashboard');
+//   } else {
+//     res.redirect('/login');
+//   }
+// });
+
 app.post('/upload', upload.single('file'), async (req, res) => {
-  if (req.session.userId) {
+  try {
+    if (!req.session.userId) {
+      return res.redirect('/login');
+    }
+    
+    if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+    }
+
     const file = new File({
       name: req.file.originalname,
-      path: req.file.filename,
+      path: req.file.path,
       owner: req.session.userId
     });
+    
     await file.save();
     res.redirect('/dashboard');
-  } else {
-    res.redirect('/login');
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).send('An error occurred during upload: ' + error.message);
   }
 });
 
