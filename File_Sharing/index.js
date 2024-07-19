@@ -29,24 +29,17 @@
 //   saveUninitialized: true
 // }));
 
-// // Multer configuration
-// // const storage = multer.diskStorage({
-// //   destination: (req, file, cb) => {
-// //     cb(null, 'public/uploads/');
-// //   },
-// //   filename: (req, file, cb) => {
-// //     cb(null, Date.now() + path.extname(file.originalname));
-// //   }
-// // });
-// // const upload = multer({ storage: storage });
+// //Multer configuration
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
-//     cb(null, '/tmp/');
+//     cb(null, 'public/uploads/');
 //   },
 //   filename: (req, file, cb) => {
 //     cb(null, Date.now() + path.extname(file.originalname));
 //   }
 // });
+// const upload = multer({ storage: storage });
+
 // // Routes
 // app.get('/', (req, res) => {
 //   res.render('index');
@@ -108,43 +101,21 @@
 //   }
 // });
 
-// // app.post('/upload', upload.single('file'), async (req, res) => {
-// //   if (req.session.userId) {
-// //     const file = new File({
-// //       name: req.file.originalname,
-// //       path: req.file.filename,
-// //       owner: req.session.userId
-// //     });
-// //     await file.save();
-// //     res.redirect('/dashboard');
-// //   } else {
-// //     res.redirect('/login');
-// //   }
-// // });
-
 // app.post('/upload', upload.single('file'), async (req, res) => {
-//   try {
-//     if (!req.session.userId) {
-//       return res.redirect('/login');
-//     }
-    
-//     if (!req.file) {
-//       return res.status(400).send('No file uploaded.');
-//     }
-
+//   if (req.session.userId) {
 //     const file = new File({
 //       name: req.file.originalname,
-//       path: req.file.path,
+//       path: req.file.filename,
 //       owner: req.session.userId
 //     });
-    
 //     await file.save();
 //     res.redirect('/dashboard');
-//   } catch (error) {
-//     console.error('Upload error:', error);
-//     res.status(500).send('An error occurred during upload: ' + error.message);
+//   } else {
+//     res.redirect('/login');
 //   }
 // });
+
+
 
 // app.get('/download/:fileId', async (req, res) => {
 //   if (req.session.userId) {
@@ -169,10 +140,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const AWS = require('aws-sdk');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -196,36 +165,28 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// AWS S3 configuration
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION
-});
-
 // Multer configuration
-const upload = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: process.env.AWS_S3_BUCKET,
-    metadata: (req, file, cb) => {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: (req, file, cb) => {
-      cb(null, Date.now().toString() + path.extname(file.originalname));
-    }
-  })
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
 });
+const upload = multer({ storage: storage });
 
 // Routes
 app.get('/', (req, res) => {
   res.render('index');
 });
 
+// GET route to display the registration form
 app.get('/register', (req, res) => {
   res.render('register', { message: req.query.message });
 });
 
+// POST route to handle the registration form submission
 app.post('/register', async (req, res) => {
   try {
     const existingUser = await User.findOne({ username: req.body.username });
@@ -287,7 +248,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
     const file = new File({
       name: req.file.originalname,
-      path: req.file.location, // use req.file.location for S3 URL
+      path: req.file.filename,
       owner: req.session.userId
     });
 
@@ -303,7 +264,7 @@ app.get('/download/:fileId', async (req, res) => {
   if (req.session.userId) {
     const file = await File.findOne({ _id: req.params.fileId, owner: req.session.userId });
     if (file) {
-      res.redirect(file.path); // use the S3 URL to download
+      res.download(path.join(__dirname, 'public/uploads', file.path), file.name);
     } else {
       res.send('File not found');
     }
