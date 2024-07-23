@@ -1,0 +1,20 @@
+{
+  "name": "weeklytest4",
+  "version": "1.0.0",
+  "description": "Hosted Link: https://form-email.onrender.com/<br>   Hosted Link: https://url-cba3.onrender.com/<br>   File Sharing:https://filesharing-4cqs.onrender.com/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akanksha-18/WeeklyTest4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akanksha-18/WeeklyTest4/issues"
+  },
+  "homepage": "https://github.com/akanksha-18/WeeklyTest4#readme"
+}
