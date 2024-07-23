@@ -26,7 +26,7 @@ app.use(cookieParser());
 app.use(checkForAuthentiicationCookie("token"));
 app.use(express.static(path.resolve("./public")));
 app.use(methodOverride('_method'));
-app.use(methodOverride('_method'));
+
 
 app.get("/", async (req, res) => {
   const allBlogs = await Blog.find({});
