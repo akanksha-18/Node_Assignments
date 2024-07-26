@@ -14,7 +14,7 @@ app.use(express.json());
 
 
  //app.use(cors());
-const cors = require('cors');
+
 
 // Allowed origins
 const allowedOrigins = [
