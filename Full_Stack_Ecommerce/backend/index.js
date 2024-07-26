@@ -10,7 +10,7 @@ const port = process.env.PORT || 4000;
 
 app.use(express.json());
 
-const cors = require('cors');
+
 
 const allowedOrigins = [
   'https://ecommerce-frontend-eocx.onrender.com/',
