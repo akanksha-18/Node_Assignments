@@ -19,6 +19,7 @@ app.use(cors({
   methods: ['GET', 'POST'], // Specify methods if needed
   allowedHeaders: ['Content-Type', 'Authorization'] // Specify headers if needed
 }));
+app.options('*', cors());
 
 // Database Connection With MongoDB
 mongoose.connect(process.env.MONGO_URL);
