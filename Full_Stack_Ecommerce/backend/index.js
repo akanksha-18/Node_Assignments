@@ -12,37 +12,13 @@ app.use(express.json());
 
 
 
-const allowedOrigins = [
-  'https://ecommerce-frontend-eocx.onrender.com/',
-  'https://ecommerce-admin-7fbz.onrender.com/'
-];
 
+ //app.use(cors());
 app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true
+  origin: 'https://ecommerce-admin-7fbz.onrender.com/', // Replace with your frontend URL
+  methods: ['GET', 'POST'], // Specify methods if needed
+  allowedHeaders: ['Content-Type', 'Authorization'] // Specify headers if needed
 }));
-// app.use(cors());
-// const allowedOrigins = ['https://ecommerce-frontend-eocx.onrender.com', 'http://localhost:3000'];
-
-// app.use(cors({
-//   origin: function(origin, callback){
-//     if(!origin) return callback(null, true);
-//     if(allowedOrigins.indexOf(origin) === -1){
-//       var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-//       return callback(new Error(msg), false);
-//     }
-//     return callback(null, true);
-//   },
-//   methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
-// }));
 
 // Database Connection With MongoDB
 mongoose.connect(process.env.MONGO_URL);
