@@ -15,17 +15,16 @@ app.use(express.json());
 
  //app.use(cors());
 
-
-// Allowed origins
+// Define allowed origins
 const allowedOrigins = [
-  'https://ecommerce-admin-7fbz.onrender.com/', // Admin panel URL
-  'https://ecommerce-frontend-eocx.onrender.com/' // Frontend URL
+  'https://ecommerce-admin-7fbz.onrender.com', // Admin panel URL
+  'https://ecommerce-frontend-eocx.onrender.com' // Frontend URL
 ];
 
-// CORS configuration
+// Configure CORS
 app.use(cors({
   origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    if (allowedOrigins.includes(origin) || !origin) {
       // Allow requests with no origin (like mobile apps or Postman)
       callback(null, true);
     } else {
@@ -38,6 +37,7 @@ app.use(cors({
 
 // Handle Preflight Requests
 app.options('*', cors());
+
 
 
 // Database Connection With MongoDB
