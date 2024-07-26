@@ -9,13 +9,20 @@ const cors = require("cors");
 const port = process.env.PORT || 4000;
 
 app.use(express.json());
- app.use(cors());
-// const corsOptions = {
-//   origin: 'https://ecommerce-frontend-eocx.onrender.com',
-//   optionsSuccessStatus: 200
-// };
+// app.use(cors());
+const allowedOrigins = ['https://ecommerce-frontend-eocx.onrender.com', 'http://localhost:3000'];
 
-// app.use(cors(corsOptions));
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+}));
 
 // Database Connection With MongoDB
 mongoose.connect(process.env.MONGO_URL);
